@@ -5,7 +5,7 @@ WORKDIR /app
 # Install dependencies
 COPY package*.json ./
 COPY prisma ./prisma/
-RUN npm ci
+RUN npm install
 
 # Copy source and build
 COPY . .
@@ -14,5 +14,5 @@ RUN npm run build
 
 EXPOSE 3000
 
-# Run migrations then start
-CMD ["sh", "-c", "npx prisma migrate deploy && npm start"]
+# Run migrations then start on $PORT (Render sets this)
+CMD ["sh", "-c", "npx prisma migrate deploy && ./node_modules/.bin/next start -p ${PORT:-3000}"]

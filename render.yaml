@@ -9,10 +9,23 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
-      # Set these in the Render dashboard:
       - key: DATABASE_URL
-        sync: false
+        fromDatabase:
+          name: coquibook-db
+          property: connectionString
+      - key: DATABASE_DIRECT_URL
+        fromDatabase:
+          name: coquibook-db
+          property: connectionString
       - key: NEXTAUTH_URL
-        sync: false
+        value: https://agenda-virtual-611u.onrender.com
+      - key: NEXT_PUBLIC_WEBAPP_URL
+        value: https://agenda-virtual-611u.onrender.com
       - key: NEXTAUTH_SECRET
         generateValue: true
+
+databases:
+  - name: coquibook-db
+    plan: free
+    region: oregon
+    ipAllowList: []
