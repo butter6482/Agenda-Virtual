@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: agenda-virtual
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    port: 3000
+    healthCheckPath: /
+    envVars:
+      - key: NODE_ENV
+        value: production
+      # Set these in the Render dashboard:
+      - key: DATABASE_URL
+        sync: false
+      - key: NEXTAUTH_URL
+        sync: false
+      - key: NEXTAUTH_SECRET
+        generateValue: true
