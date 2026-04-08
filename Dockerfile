@@ -17,4 +17,4 @@ RUN npm run build
 EXPOSE 3000
 
 # Run migrations then start on $PORT (Render sets this)
-CMD ["sh", "-c", "npx prisma migrate deploy && ./node_modules/.bin/next start -p ${PORT:-3000}"]
+CMD ["sh", "-c", "npx prisma migrate deploy && node prisma/seed.mjs && ./node_modules/.bin/next start -p ${PORT:-3000}"]
