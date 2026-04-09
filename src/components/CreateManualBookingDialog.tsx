@@ -14,7 +14,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogClose } from "
 import { Form, TextField, TextArea, Label } from "./ui/form";
 import Select from "react-select";
 
-import { ZCreateManualBookingInputSchema, type TCreateManualBookingInput } from "../trpc/routers/bookings";
+import { ZCreateManualBookingInput as ZCreateManualBookingInputSchema, type TCreateManualBookingInput } from "../trpc/routers/bookings.schemas";
 import type { SalonDayBooking } from "./SalonGridView";
 
 dayjs.extend(utc);
@@ -118,8 +118,8 @@ export const CreateManualBookingDialog = (props: ICreateManualBookingDialog) => 
   const colorKey: "pink" | "green" = selectedStaffOption?.color ?? "pink";
   const c = STAFF_COLORS[colorKey];
 
-  function onMutationSuccess(verb: string) {
-    utils.bookings.invalidate();
+  async function onMutationSuccess(verb: string) {
+    await utils.bookings.invalidate();
     setIsOpenDialog(false);
     methods.reset();
     setDurationHours(1);

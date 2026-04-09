@@ -3,74 +3,20 @@ import { v4 as uuidv4 } from "uuid";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
-import { TRPCError } from "@trpc/server";
-import type { PrismaClient } from "@prisma/client";
-import { router, authedProcedure } from "../../server/trpc";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
+import { TRPCError } from "@trpc/server";
+import type { PrismaClient } from "@prisma/client";
+import { router, authedProcedure } from "../../server/trpc";
+import {
+  ZGetDayBookingsInput,
+  ZCreateManualBookingInput,
+  ZUpdateManualBookingInput,
+} from "./bookings.schemas";
 
-const SALON_TZ = "America/Puerto_Rico";
-
-// ── Shared schemas ──────────────────────────────────────────────────────────
-
-const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
-
-const ZGetDayBookingsInput = z.object({
-  date: z.string().regex(dateRegex),
-  endDate: z.string().regex(dateRegex).optional(),
-  timezone: z.string().default(SALON_TZ),
-});
-
-const ZCreateManualBookingInput = z.object({
-  serviceName: z.string().min(1, "El servicio es requerido"),
-  startTime: z.preprocess((val) => {
-    if (typeof val === "string" && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(val)) {
-      const [datePart, timePart] = val.split("T");
-      const [year, month, day] = datePart.split("-").map(Number);
-      const [hours, minutes] = timePart.split(":").map(Number);
-      const utcMs = Date.UTC(year, month - 1, day, hours + 4, minutes, 0);
-      return new Date(utcMs).toISOString();
-    }
-    return val;
-  }, z.string().datetime()),
-  customerName: z.string().min(1, "Nombre del cliente es requerido"),
-  customerPhone: z.string().optional(),
-  customerEmail: z.string().email().optional().or(z.literal("")),
-  notes: z.string().optional(),
-  customerTimezone: z.string().default(SALON_TZ),
-  staffUserId: z.number().int().positive().optional(),
-  durationMinutes: z.number().int().min(5).default(60),
-  salonPrice: z.number().min(0).optional(),
-});
-
-const ZUpdateManualBookingInput = z.object({
-  bookingUid: z.string(),
-  serviceName: z.string().min(1),
-  customerName: z.string().min(1),
-  customerPhone: z.string().optional(),
-  customerEmail: z.string().email().optional().or(z.literal("")),
-  startTime: z.preprocess((val) => {
-    if (typeof val === "string" && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(val)) {
-      const [datePart, timePart] = val.split("T");
-      const [year, month, day] = datePart.split("-").map(Number);
-      const [hours, minutes] = timePart.split(":").map(Number);
-      const utcMs = Date.UTC(year, month - 1, day, hours + 4, minutes, 0);
-      return new Date(utcMs).toISOString();
-    }
-    return val;
-  }, z.string().datetime()),
-  durationMinutes: z.number().min(15).max(480),
-  staffUserId: z.number().optional(),
-  salonPrice: z.number().min(0).optional(),
-  notes: z.string().optional(),
-});
-
-// Export schema types for components
-export type TCreateManualBookingInput = z.infer<typeof ZCreateManualBookingInput>;
-export { ZCreateManualBookingInput as ZCreateManualBookingInputSchema };
-
-export type TUpdateManualBookingInput = z.infer<typeof ZUpdateManualBookingInput>;
+export type { TCreateManualBookingInput, TUpdateManualBookingInput } from "./bookings.schemas";
+export { ZCreateManualBookingInput as ZCreateManualBookingInputSchema } from "./bookings.schemas";
 
 // ── Helper: verify admin access ─────────────────────────────────────────────
 
@@ -109,7 +55,7 @@ export const bookingsRouter = router({
         startTime: { gte: startOfRange, lte: endOfRange },
         status: { notIn: ["CANCELLED", "REJECTED"] },
         userId: { in: accessibleUserIds },
-        NOT: { title: { contains: "meeting", mode: "insensitive" } },
+        NOT: { title: { contains: "meeting" } },
       },
       select: {
         id: true,
@@ -173,7 +119,7 @@ export const bookingsRouter = router({
         userPrimaryEmail: bookingUserEmail,
         description: notes || null,
         salonPrice: salonPrice ?? null,
-        responses: { name: customerName, email: customerEmail || "", phone: customerPhone, notes: notes || "" },
+        responses: JSON.stringify({ name: customerName, email: customerEmail || "", phone: customerPhone, notes: notes || "" }),
         attendees: {
           create: {
             name: customerName,
@@ -301,7 +247,7 @@ export const bookingsRouter = router({
         team: {
           select: {
             members: {
-              where: { accepted: true, role: "MEMBER" },
+              where: { accepted: true },
               select: { user: { select: { id: true, name: true, email: true, avatarUrl: true } } },
             },
           },
@@ -313,6 +259,11 @@ export const bookingsRouter = router({
     const staff: { id: number; name: string | null; email: string; avatarUrl: string | null }[] = [];
     for (const m of memberships) {
       for (const member of m.team.members) {
+        const nameUpper = member.user.name?.toUpperCase() || "";
+        if (nameUpper.includes("HB STYLE") || nameUpper.includes("HAIR GALLERY")) {
+          continue;
+        }
+
         if (!seen.has(member.user.id)) {
           seen.add(member.user.id);
           staff.push(member.user);

@@ -13,14 +13,11 @@ services:
         fromDatabase:
           name: coquibook-db
           property: connectionString
-      - key: DATABASE_DIRECT_URL
-        fromDatabase:
-          name: coquibook-db
-          property: connectionString
       - key: NEXTAUTH_URL
-        value: https://agenda-virtual-611u.onrender.com
+        value: https://TU-APP.onrender.com
       - key: NEXT_PUBLIC_WEBAPP_URL
-        value: https://agenda-virtual-611u.onrender.com
+        value: https://TU-APP.onrender.com
+
       - key: NEXTAUTH_SECRET
         generateValue: true
 
