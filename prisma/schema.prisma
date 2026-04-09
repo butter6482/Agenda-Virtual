@@ -36,11 +36,17 @@ model Membership {
   teamId   Int
   userId   Int
   accepted Boolean        @default(false)
-  role     String
+  role     MembershipRole
   user     User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   team     Team           @relation(fields: [teamId], references: [id], onDelete: Cascade)
 
   @@unique([userId, teamId])
+}
+
+enum MembershipRole {
+  MEMBER
+  ADMIN
+  OWNER
 }
 
 model Booking {
@@ -52,11 +58,19 @@ model Booking {
   description      String?
   startTime        DateTime
   endTime          DateTime
-  status           String        @default("ACCEPTED")
+  status           BookingStatus @default(ACCEPTED)
   salonPrice       Float?
-  responses        String?
+  responses        Json?
   user             User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
   attendees        Attendee[]
+}
+
+enum BookingStatus {
+  CANCELLED
+  ACCEPTED
+  REJECTED
+  PENDING
+  AWAITING_HOST
 }
 
 model Attendee {

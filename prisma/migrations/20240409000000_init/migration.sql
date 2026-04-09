@@ -1,3 +1,9 @@
+-- CreateEnum
+CREATE TYPE "MembershipRole" AS ENUM ('MEMBER', 'ADMIN', 'OWNER');
+
+-- CreateEnum
+CREATE TYPE "BookingStatus" AS ENUM ('CANCELLED', 'ACCEPTED', 'REJECTED', 'PENDING', 'AWAITING_HOST');
+
 -- CreateTable
 CREATE TABLE "User" (
     "id" SERIAL NOT NULL,
@@ -30,7 +36,7 @@ CREATE TABLE "Membership" (
     "teamId" INTEGER NOT NULL,
     "userId" INTEGER NOT NULL,
     "accepted" BOOLEAN NOT NULL DEFAULT false,
-    "role" TEXT NOT NULL,
+    "role" "MembershipRole" NOT NULL,
 
     CONSTRAINT "Membership_pkey" PRIMARY KEY ("id")
 );
@@ -45,9 +51,9 @@ CREATE TABLE "Booking" (
     "description" TEXT,
     "startTime" TIMESTAMP(3) NOT NULL,
     "endTime" TIMESTAMP(3) NOT NULL,
-    "status" TEXT NOT NULL DEFAULT 'ACCEPTED',
+    "status" "BookingStatus" NOT NULL DEFAULT 'ACCEPTED',
     "salonPrice" DOUBLE PRECISION,
-    "responses" TEXT,
+    "responses" JSONB,
 
     CONSTRAINT "Booking_pkey" PRIMARY KEY ("id")
 );

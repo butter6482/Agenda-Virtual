@@ -119,7 +119,7 @@ export const bookingsRouter = router({
         userPrimaryEmail: bookingUserEmail,
         description: notes || null,
         salonPrice: salonPrice ?? null,
-        responses: JSON.stringify({ name: customerName, email: customerEmail || "", phone: customerPhone, notes: notes || "" }),
+        responses: { name: customerName, email: customerEmail || "", phone: customerPhone, notes: notes || "" },
         attendees: {
           create: {
             name: customerName,
