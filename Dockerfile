@@ -16,5 +16,5 @@ RUN npm run build
 
 EXPOSE 3000
 
-# Run migrations then start on $PORT (Render sets this)
-CMD ["sh", "-c", "npx prisma migrate deploy && node prisma/seed.mjs && npm run start"]
+# Heal the known initial migration edge case, then migrate/seed/start.
+CMD ["node", "scripts/render-start.mjs"]
