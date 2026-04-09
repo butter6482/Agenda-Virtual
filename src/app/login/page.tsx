@@ -37,8 +37,8 @@ export default function LoginPage() {
       <div className="w-full max-w-sm">
         {/* Logo / Header */}
         <div className="mb-8 text-center">
-          <div className="mb-3 text-5xl">✂️</div>
-          <h1 className="text-2xl font-black text-[#1A1A1A]">HB Style</h1>
+          <div className="mb-3 text-5xl">💅</div>
+          <h1 className="text-2xl font-black text-[#1A1A1A]">Nail Gallery</h1>
           <p className="text-sm text-[#B8860B]">Sistema de citas</p>
         </div>
 
